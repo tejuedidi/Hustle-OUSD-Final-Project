@@ -1,0 +1,69 @@
+name: Check Existence of Required Files
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  check_req_files:
+    runs-on: ubuntu-latest  # Run on the latest Ubuntu
+
+    steps:
+    - name: Fetch Repo Code
+      uses: actions/checkout@v2  
+
+    - name: Install Dependencies
+      run: |
+        GREEN='\033[0;32m'  # Green for passed
+        echo -e "${GREEN}Installing dependencies..."
+        pip install pytest
+        echo  -e "${GREEN}Dependencies installed successfully."
+    
+    - name: Students Check Here !!!
+      run: |
+        echo -e "Checking for all required files..."
+        GREEN='\033[0;32m'  # Green for passed
+        RED='\033[0;31m'    # Red for failed
+        BLUE='\033[0;34m'
+
+        # List of required files
+        required_files=("item.py" "npc.py" "player.py" "room.py" "game.py" "README.md")
+        all_passed=true
+        
+        echo -e "${BLUE}[FILES]:"
+
+        # Loop through each file in the list and check if it exists
+        for file in "${required_files[@]}"; do
+          if [ -f "$file" ]; then
+            echo -e "  • $file was submitted: ${GREEN}passed"
+          else
+            echo -e "  • $file was not submitted: ${RED}failed"
+            all_passed=false 
+          fi
+        done
+
+
+        if [ "$all_passed" = false ]; then
+          echo -e "${RED}Some required files are missing. Please submit all files."
+          exit 1  # Fail the job if any required file is missing
+        fi
+
+        echo -e "${GREEN}All required files are present. Proceeding with other checks."
+        
+        echo -e "${BLUE}Running tests..."
+
+        pytest_result=$(pytest -s --color=auto)
+        echo -e "${pytest_result}"
+
+        if [ $? -eq 0 ]; then
+          echo -e "${GREEN}All tests passed successfully."
+        else
+          echo -e "${RED}Some tests failed. Please check the output above."
+          exit 1 
+        fi
+      
+
