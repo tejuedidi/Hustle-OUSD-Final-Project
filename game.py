@@ -51,6 +51,3 @@ class Game:
     def run(self):
         """Main game loop"""
         ### YOUR CODE HERE ###
-
-def main():
-    print("testing game.py ")
